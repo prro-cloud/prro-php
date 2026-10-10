@@ -15,6 +15,7 @@ use PrroCloud\Prro\Webhook\Data\KeyData;
 use PrroCloud\Prro\Webhook\Data\OfflineAbandonedData;
 use PrroCloud\Prro\Webhook\Data\OfflineData;
 use PrroCloud\Prro\Webhook\Data\PingData;
+use PrroCloud\Prro\Webhook\Data\ReceiptData;
 use PrroCloud\Prro\Webhook\Data\RemediationData;
 use PrroCloud\Prro\Webhook\Data\ShiftData;
 use PrroCloud\Prro\Webhook\Data\TaskData;
@@ -138,6 +139,14 @@ final readonly class Event
             WebhookEvent::DpsFlapping,
             WebhookEvent::DpsModeChanged,
         );
+    }
+
+    /**
+     * Дані події receipt.registered.
+     */
+    public function receipt(): ReceiptData
+    {
+        return $this->decode(ReceiptData::class, WebhookEvent::ReceiptRegistered);
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PrroCloud\Prro\Input;
 
 use PrroCloud\Prro\Enum\PaymentType;
+use PrroCloud\Prro\Exception\InvalidArgumentException;
 use PrroCloud\Prro\Internal\Attribute\Json;
 use PrroCloud\Prro\Internal\Hydrator;
 use PrroCloud\Prro\Money\Amount;
@@ -26,6 +27,8 @@ final readonly class Payment implements \JsonSerializable
      *                                     КАРТКИ», «ТАЛОН», «Подарунковий сертифікат». Фіскальний код форми
      *                                     лишається за type. Для готівки не приймається
      * @param CardDetails|null   $card     реквізити еквайрингу для оплати карткою
+     *
+     * @throws InvalidArgumentException форма оплати Unknown, сума має недійсний формат
      */
     public function __construct(
         #[Json('type')] public PaymentType $type,
@@ -34,6 +37,9 @@ final readonly class Payment implements \JsonSerializable
         #[Json('means')] public ?string $means = null,
         #[Json('card')] public ?CardDetails $card = null,
     ) {
+        if ($type === PaymentType::Unknown) {
+            throw new InvalidArgumentException('prro: Payment: type Unknown is not a payment form');
+        }
         $this->sum = Amount::of($sum);
         $this->provided = $provided === null ? null : Amount::of($provided);
     }

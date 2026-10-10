@@ -20,6 +20,7 @@ use PrroCloud\Prro\Exception\TaskFailedException;
 use PrroCloud\Prro\Exception\TransportException;
 use PrroCloud\Prro\Exception\UnauthorizedException;
 use PrroCloud\Prro\Exception\ValidationException;
+use PrroCloud\Prro\Exception\WebhookLimitReachedException;
 use PrroCloud\Prro\Http\Request;
 use PrroCloud\Prro\Http\Response;
 use PrroCloud\Prro\Internal\Backoff;
@@ -232,6 +233,7 @@ final class ClientTest extends TestCase
         yield 'not found' => [404, '{"code":"not_found","message":"cash register not found"}', NotFoundException::class];
         yield 'payment' => [402, '{"code":"payment_required","message":"balance"}', PaymentRequiredException::class];
         yield 'key reused' => [409, '{"code":"idempotency_key_reused","message":"other op"}', IdempotencyKeyReusedException::class];
+        yield 'webhook limit' => [409, '{"code":"webhook_limit_reached","message":"limit"}', WebhookLimitReachedException::class];
         yield 'validation' => [422, '{"code":"validation_failed","message":"items","details":[{"field":"items"}]}', ValidationException::class];
         yield 'status fallback' => [404, 'not found', NotFoundException::class];
         yield 'code wins over status' => [400, '{"code":"not_found","message":"x"}', NotFoundException::class];

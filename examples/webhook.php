@@ -73,6 +73,10 @@ $result = Webhook::handle((string) getenv('PRRO_WEBHOOK_SECRET'), static functio
         case WebhookEvent::ClientBalanceLow:
             logLine('баланс добігає кінця: лишилося %d чеків', $e->balance()->receiptsLeft);
             break;
+        case WebhookEvent::ReceiptRegistered:
+            $d = $e->receipt();
+            logLine('чек %s (%s, %s) на %s грн: %s', $d->fiscalNumber, $d->type->value, $d->source->value, (string) $d->total, $d->receiptUrl);
+            break;
         case null:
             logLine('невідома подія %s — оновіть prro-php', $e->type);
             break;

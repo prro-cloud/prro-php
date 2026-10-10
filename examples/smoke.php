@@ -90,7 +90,11 @@ check('billing->usage', static function () use ($client): string {
     return sprintf('баланс %s коп., чеків за період %d', $u->balance, $u->receipts);
 }, $failed);
 check('invoices->list', static fn() => count($client->invoices->list()) . ' рахунків', $failed);
-check('webhooks->list', static fn() => count($client->webhooks->list()) . ' вебхуків', $failed);
+check('webhooks->list', static function () use ($client): string {
+    $w = $client->webhooks->list();
+
+    return sprintf('%d із %d вебхуків', $w->used, $w->limit);
+}, $failed);
 
 if ($failed > 0) {
     echo "\nпомилок: {$failed}\n";

@@ -33,6 +33,12 @@ enum WebhookEvent: string
     case RegisterNeedsAttention = 'register.needs_attention';
     /** Баланс опустився нижче порога; попередження перед тим, як чеки почнуть відхилятися з 402. */
     case ClientBalanceLow = 'client.balance_low';
+    /**
+     * Зареєстровано чек (продаж, повернення, сторно, службове внесення чи
+     * видача) з повним вмістом: позиції, оплати, податки — у тому вигляді, в
+     * якому його отримала ДПС.
+     */
+    case ReceiptRegistered = 'receipt.registered';
 
     // Зарезервовані події: на них не підписуються, але доставка може їх нести.
 

@@ -12,6 +12,7 @@ use PrroCloud\Prro\Internal\Requester;
 use PrroCloud\Prro\Model\CreatedWebhook;
 use PrroCloud\Prro\Model\WebhookDelivery;
 use PrroCloud\Prro\Model\WebhookEndpoint;
+use PrroCloud\Prro\Model\WebhookList;
 
 /**
  * Реєстрація вебхуків і історія доставок.
@@ -22,13 +23,12 @@ final readonly class WebhooksService
     public function __construct(private Requester $requester) {}
 
     /**
-     * Повертає вебхуки клієнта; секрети не повертаються.
-     *
-     * @return list<WebhookEndpoint>
+     * Повертає вебхуки клієнта разом із лімітом: поки used < limit, можна
+     * створити ще один.
      */
-    public function list(): array
+    public function list(): WebhookList
     {
-        return Hydrator::hydrateList(WebhookEndpoint::class, $this->requester->send('GET', '/v1/webhooks') ?? [], 'webhooks');
+        return Hydrator::hydrate(WebhookList::class, $this->requester->send('GET', '/v1/webhooks') ?? []);
     }
 
     /**
@@ -38,9 +38,14 @@ final readonly class WebhooksService
      * повтори за delivery_id. Секрет у відповіді повертається рівно один
      * раз — збережіть його одразу.
      *
+     * Вебхуків може бути не більше, ніж кас у клієнта, плюс один; призупинені
+     * теж рахуються.
+     *
      * @param string             $url    абсолютний http(s)-URL приймача
      * @param list<WebhookEvent> $events події підписки; порожній перелік — усі події
      * @param string|null        $secret секрет HMAC; null — згенерує сервер
+     *
+     * @throws \PrroCloud\Prro\Exception\WebhookLimitReachedException ліміт вебхуків вичерпано; limit і used — у details
      */
     public function create(string $url, array $events = [], ?string $secret = null): CreatedWebhook
     {
@@ -90,7 +95,9 @@ final readonly class WebhooksService
     }
 
     /**
-     * Повертає історію доставок вебхука id, від найновішої.
+     * Повертає історію доставок вебхука id, від найновішої. Доставлені
+     * зберігаються 30 днів, невдалі (dead) — 14 днів від останньої спроби;
+     * старіші зникають з історії.
      *
      * @param DeliveryStatus|null $status лише доставки в цьому стані; null — усі
      * @param int                 $limit  скільки доставок повернути: 1–200; 0 — типово 50
@@ -116,9 +123,10 @@ final readonly class WebhooksService
 
     /**
      * Повертає доставку deliveryId вебхука id у чергу з новим запасом
-     * спроб; спроба — одразу. Події, доставлені тим часом, не
-     * повторюються: ця прийде після них, тож упорядковуйте події за
-     * sequence. Якщо саме зараз триває спроба доставки — ApiException 409
+     * спроб; спроба — одразу. Доступно, поки доставка є в історії: невдала —
+     * 14 днів від останньої спроби, далі — NotFoundException. Події,
+     * доставлені тим часом, не повторюються: ця прийде після них, тож
+     * упорядковуйте події за sequence. Якщо саме зараз триває спроба доставки — ApiException 409
      * з errorCode "delivery_in_flight".
      */
     public function replay(string $id, string $deliveryId): WebhookDelivery
