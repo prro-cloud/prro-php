@@ -17,7 +17,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
-        "guzzlehttp/guzzle": "^7",
+        "guzzlehttp/guzzle": "^7 || ^8",
         "phpstan/phpstan": "^2",
         "phpstan/phpstan-strict-rules": "^2",
         "phpunit/phpunit": "^11",
