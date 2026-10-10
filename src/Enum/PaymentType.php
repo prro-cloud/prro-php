@@ -20,4 +20,6 @@ enum PaymentType: string
     case BankTransfer = 'bank_transfer';
     /** 100000 ПРЯМИЙ ДЕБЕТ. */
     case DirectDebit = 'direct_debit';
+    /** Значення, якого ця версія бібліотеки не знає; лише у відповідях. */
+    case Unknown = 'unknown';
 }

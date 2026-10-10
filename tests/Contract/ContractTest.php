@@ -13,6 +13,7 @@ use PrroCloud\Prro\Enum\DpsMode;
 use PrroCloud\Prro\Enum\FaultClass;
 use PrroCloud\Prro\Enum\InvoiceStatus;
 use PrroCloud\Prro\Enum\PaymentType;
+use PrroCloud\Prro\Enum\ReceiptSource;
 use PrroCloud\Prro\Enum\ReceiptType;
 use PrroCloud\Prro\Enum\RegisterMode;
 use PrroCloud\Prro\Enum\RegisterState;
@@ -25,6 +26,7 @@ use PrroCloud\Prro\Input;
 use PrroCloud\Prro\Internal\Hydrator;
 use PrroCloud\Prro\Model;
 use PrroCloud\Prro\Testing\MockTransport;
+use PrroCloud\Prro\Webhook\Data;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -191,6 +193,8 @@ final class ContractTest extends TestCase
         yield 'DeliveryStatus' => [['WebhookDelivery', 'properties', 'status'], DeliveryStatus::class, []];
         yield 'InvoiceStatus' => [['Invoice', 'properties', 'status'], InvoiceStatus::class, []];
         yield 'DpsMode' => [['DPSPulse', 'properties', 'verdict'], DpsMode::class, []];
+        yield 'ReceiptRegisteredData.type' => [['ReceiptRegisteredData', 'properties', 'type'], ReceiptType::class, []];
+        yield 'ReceiptSource' => [['ReceiptRegisteredData', 'properties', 'source'], ReceiptSource::class, []];
     }
 
     /**
@@ -275,6 +279,13 @@ final class ContractTest extends TestCase
         yield 'CardDetails' => [$schema('ReceiptPayment', 'properties', 'card'), Input\CardDetails::class, []];
         yield 'WebhookEndpoint' => [$schema('WebhookEndpoint'), Model\WebhookEndpoint::class, []];
         yield 'WebhookDelivery' => [$schema('WebhookDelivery'), Model\WebhookDelivery::class, []];
+        yield 'WebhookList' => [['paths', '/v1/webhooks', 'get', 'responses', '200', 'content', 'application/json', 'schema'], Model\WebhookList::class, []];
+        // Дані подій вебхуків, для яких контракт описує схему.
+        yield 'ReceiptData' => [$schema('ReceiptRegisteredData'), Data\ReceiptData::class, []];
+        yield 'ReceiptLine' => [$schema('ReceiptRegisteredData', 'properties', 'items', 'items'), Data\ReceiptLine::class, []];
+        yield 'ReceiptPayment' => [$schema('ReceiptRegisteredData', 'properties', 'payments', 'items'), Data\ReceiptPayment::class, []];
+        yield 'ReceiptTax' => [$schema('ReceiptRegisteredData', 'properties', 'taxes', 'items'), Data\ReceiptTax::class, []];
+        yield 'ReceiptData.original' => [$schema('ReceiptRegisteredData', 'properties', 'original'), Model\ReturnOriginal::class, []];
         yield 'BillingUsage' => [$schema('BillingUsage'), Model\BillingUsage::class, []];
         yield 'BillingPeriod' => [$schema('BillingUsage', 'properties', 'period'), Model\BillingPeriod::class, []];
         yield 'Tariff' => [$schema('BillingUsage', 'properties', 'tariff'), Model\Tariff::class, []];

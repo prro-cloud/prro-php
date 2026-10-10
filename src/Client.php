@@ -33,10 +33,10 @@ use Psr\Log\LoggerInterface;
 final class Client
 {
     /** Версія бібліотеки; потрапляє в заголовок User-Agent. */
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.2.0';
 
     /** Версія контракту API (info.version в openapi.yaml), з якою зібрано бібліотеку. */
-    public const API_VERSION = '0.5.0';
+    public const API_VERSION = '0.6.0';
 
     /** Базова адреса машинного API PRRO.cloud. */
     public const DEFAULT_BASE_URL = 'https://api.prro.cloud';

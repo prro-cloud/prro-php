@@ -31,6 +31,7 @@ class ApiException extends \RuntimeException implements PrroException
         'not_found' => NotFoundException::class,
         'payment_required' => PaymentRequiredException::class,
         'idempotency_key_reused' => IdempotencyKeyReusedException::class,
+        'webhook_limit_reached' => WebhookLimitReachedException::class,
         'validation_failed' => ValidationException::class,
         'task_failed' => TaskFailedException::class,
     ];

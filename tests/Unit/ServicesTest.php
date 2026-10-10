@@ -23,6 +23,7 @@ use PrroCloud\Prro\Exception\ForbiddenException;
 use PrroCloud\Prro\Exception\InvalidArgumentException;
 use PrroCloud\Prro\Exception\TaskFailedException;
 use PrroCloud\Prro\Exception\WaitTimeoutException;
+use PrroCloud\Prro\Exception\WebhookLimitReachedException;
 use PrroCloud\Prro\Http\Request;
 use PrroCloud\Prro\Http\Response;
 use PrroCloud\Prro\Input\CardDetails;
@@ -119,6 +120,7 @@ final class ServicesTest extends TestCase
         // Так float потрапляє в суму у файлі без strict_types: 1/3 → "0.33333333333333".
         yield 'float artefact' => [static fn() => new Payment(type: PaymentType::Cash, sum: (string) (1 / 3))];
         yield 'bad date' => [static fn() => new ReceiptOriginal('1', date: '01.09.2026')];
+        yield 'payment unknown' => [static fn() => new Payment(type: PaymentType::Unknown, sum: '1.00')];
     }
 
     /**
@@ -421,10 +423,12 @@ final class ServicesTest extends TestCase
     {
         $endpoint = self::fixture('webhook_endpoint');
 
-        [$client, $mock] = $this->stub(200, '{"webhooks":[' . $endpoint . ']}');
+        [$client, $mock] = $this->stub(200, '{"webhooks":[' . $endpoint . '],"limit":3,"used":1}');
         $list = $client->webhooks->list();
         self::assertRequest($mock->lastRequest(), 'GET', '/v1/webhooks');
-        self::assertSame([WebhookEvent::TaskCompleted], $list[0]->events);
+        self::assertSame([WebhookEvent::TaskCompleted], $list->webhooks[0]->events);
+        self::assertSame(3, $list->limit);
+        self::assertSame(1, $list->used);
 
         [$client, $mock] = $this->stub(201, (string) preg_replace('/"id"/', '"secret":"s3cr3t","id"', $endpoint, 1));
         $created = $client->webhooks->create('https://example.com/prro-hook', [WebhookEvent::TaskCompleted]);
@@ -435,6 +439,14 @@ final class ServicesTest extends TestCase
         self::assertRequest($r, 'POST', '/v1/webhooks');
         self::assertSame('{"url":"https://example.com/prro-hook","events":["task.completed"]}', $r->body);
         self::assertNull($r->header('Idempotency-Key'));
+
+        [$client] = $this->stub(409, '{"code":"webhook_limit_reached","message":"limit","details":{"limit":3,"used":3}}');
+        try {
+            $client->webhooks->create('https://example.com/prro-hook');
+            self::fail('no exception');
+        } catch (WebhookLimitReachedException $e) {
+            self::assertSame(['limit' => 3, 'used' => 3], $e->details);
+        }
 
         foreach ([
             '{"active":false}' => static fn(Client $c) => $c->webhooks->update('w1', active: false),

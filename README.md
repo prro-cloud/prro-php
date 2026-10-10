@@ -129,6 +129,7 @@ $order->saveMeta('prro_task_id', $task->id); // результат прийде 
 | `NotFoundException` | 404 | ресурсу немає або токен не має до нього доступу |
 | `PaymentRequiredException` | 402 | баланс вичерпано — нові чеки заблоковано |
 | `IdempotencyKeyReusedException` | 409 | ключ уже використано для іншої операції |
+| `WebhookLimitReachedException` | 409 | вебхуків уже стільки, скільки кас, плюс один |
 | `ValidationException` | 422 | запит не пройшов валідацію, подробиці в `$e->details` |
 | `TaskFailedException` | 422 | ДПС відхилила документ або немає відкритої зміни |
 
@@ -199,6 +200,16 @@ $wh = $client->webhooks->create(
 );
 // $wh->secret — збережіть, наприклад, у PRRO_WEBHOOK_SECRET.
 ```
+
+Вебхуків може бути не більше, ніж кас у клієнта, плюс один; призупинені теж
+рахуються. Скільки зайнято і скільки дозволено, показує
+`$client->webhooks->list()` — поля `used` і `limit`; понад ліміт `create()`
+кидає `WebhookLimitReachedException`.
+
+Подія `receipt.registered` несе повний вміст кожного зареєстрованого чека —
+позиції, оплати, податки, посилання для покупця — і приходить також на чеки,
+подані з панелі кабінету (`source === ReceiptSource::Cabinet`). Її дані
+повертає `$e->receipt()`.
 
 ### 2. Приймайте доставки
 

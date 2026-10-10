@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 use PrroCloud\Prro\Enum\AttentionReason;
 use PrroCloud\Prro\Enum\DpsMode;
 use PrroCloud\Prro\Enum\FaultClass;
+use PrroCloud\Prro\Enum\PaymentType;
+use PrroCloud\Prro\Enum\ReceiptSource;
+use PrroCloud\Prro\Enum\ReceiptType;
 use PrroCloud\Prro\Enum\TaskStatus;
 use PrroCloud\Prro\Enum\WebhookEvent;
 use PrroCloud\Prro\Internal\GoDuration;
@@ -104,9 +107,9 @@ final class WebhookTest extends TestCase
 
     public function testUnknownEventType(): void
     {
-        $body = self::envelope('receipt.registered', '{"x":1}');
+        $body = self::envelope('register.renamed', '{"x":1}');
         $e = Webhook::parse(self::SECRET, $body, Webhook::sign(self::SECRET, $body));
-        self::assertSame('receipt.registered', $e->type);
+        self::assertSame('register.renamed', $e->type);
         self::assertNull($e->eventType());
         self::assertSame(['x' => 1], $e->data);
         self::assertNull((new Event(type: 'unknown'))->eventType());
@@ -172,6 +175,28 @@ final class WebhookTest extends TestCase
             $d = $e->balance();
             self::assertSame(100, $d->receiptsLeft);
             self::assertSame('50.0000', (string) $d->pricePerReceipt);
+        }];
+        yield 'receipt.registered' => ['receipt.registered', '{"cash_register_id":"r1","register_fiscal_number":"4001063533",
+            "document_id":"d2","task_id":"t2","type":"return","source":"cabinet","user_id":"u1","cashier":"Олена",
+            "local_number":43,"fiscal_number":"7466800083","offline":false,"testing":false,"shift_id":"s1",
+            "shift_number":147,"issued_at":"2026-07-14T10:15:04.123456789Z","total":"65.00",
+            "items":[{"name":"Кава американо","quantity":"1","price":"65.00","cost":"65.00","tax_letters":"А"}],
+            "payments":[{"type":"card","name":"КАРТКА","sum":"65.00"},{"type":"crypto","name":"КРИПТА","sum":"0.00"}],
+            "taxes":[{"letter":"А","name":"ПДВ","rate":"20.00","turnover":"65.00","sum":"10.83"}],
+            "original":{"fiscal_number":"7466800082","document_id":"d1","verified":true},
+            "receipt_url":"https://r.prro.cloud/aB3xK9pQvT2mNr7d"}', static function (Event $e): void {
+            $d = $e->receipt();
+            self::assertSame(ReceiptType::Return, $d->type);
+            self::assertSame(ReceiptSource::Cabinet, $d->source);
+            self::assertSame(147, $d->shiftNumber);
+            self::assertSame('65.00', (string) $d->items[0]->price);
+            self::assertNull($d->items[0]->discount);
+            self::assertSame(PaymentType::Card, $d->payments[0]->type);
+            self::assertSame(PaymentType::Unknown, $d->payments[1]->type);
+            self::assertSame('10.83', (string) $d->taxes[0]->sum);
+            self::assertTrue($d->original?->verified);
+            self::assertNull($d->rounding);
+            self::assertSame('15:04.123456', $d->issuedAt->format('i:s.u'));
         }];
         yield 'system.dps_offline' => ['system.dps_offline', '{"verdict":"offline","override":"","effective":"offline","cause":"probe_failed",
             "occurred_at":"2026-07-14T10:15:04Z"}', static function (Event $e): void {
