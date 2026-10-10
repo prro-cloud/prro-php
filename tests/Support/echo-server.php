@@ -22,6 +22,17 @@ if (is_string($path) && preg_match('#^/status/(\d{3})$#', $path, $m) === 1) {
     header('Retry-After: 7');
 }
 
+// Заголовки запиту з $_SERVER: getallheaders() має різні сигнатури в PHP 8.2 і 8.4.
+$headers = [];
+foreach ($_SERVER as $key => $value) {
+    if (is_string($key) && str_starts_with($key, 'HTTP_')) {
+        $headers[strtolower(str_replace('_', '-', substr($key, 5)))] = $value;
+    }
+}
+if (isset($_SERVER['CONTENT_TYPE'])) {
+    $headers['content-type'] = $_SERVER['CONTENT_TYPE'];
+}
+
 http_response_code($status);
 header('Content-Type: application/json');
 header('X-Multi: a', false);
@@ -29,6 +40,6 @@ header('X-Multi: b', false);
 echo json_encode([
     'method' => $_SERVER['REQUEST_METHOD'] ?? '',
     'uri' => $uri,
-    'headers' => array_change_key_case((array) getallheaders(), CASE_LOWER),
+    'headers' => $headers,
     'body' => file_get_contents('php://input'),
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
