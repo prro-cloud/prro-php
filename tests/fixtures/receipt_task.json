@@ -1,0 +1,20 @@
+{
+  "task_id": "0197a2c1-0000-7000-8000-000000000001",
+  "type": "receipt",
+  "status": "succeeded",
+  "created_at": "2026-08-03T01:07:53Z",
+  "finished_at": "2026-08-03T01:07:54.123456789Z",
+  "result": {
+    "prro_id": "reg-1",
+    "shift_id": "shift-1",
+    "shift_number": 147,
+    "receipt": {
+      "document_id": "0197a2c3-0000-7000-8000-000000000002",
+      "local_number": 42,
+      "fiscal_number": "7466800082",
+      "register_fiscal_number": "4001063533",
+      "receipt_url": "https://r.prro.cloud/aB3xK9pQvT2mNr7c",
+      "tax_url": "https://cabinet.tax.gov.ua/cashregs/check?fn=4001063533&id=7466800082"
+    }
+  }
+}

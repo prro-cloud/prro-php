@@ -1,0 +1,19 @@
+{
+  "id": "reg-1",
+  "fiscal_number": "4001063533",
+  "local_number": "1",
+  "mode": "production",
+  "state": "opened",
+  "shift_mode": "round_the_clock",
+  "shift_close_times": ["09:00", "21:00"],
+  "cash_balance": {"amount": "1500.00", "as_of": "2026-08-03T01:07:54Z"},
+  "current_shift": {"id": "s1", "number": 147, "status": "opened", "opened_at": "2026-08-03T01:00:00Z", "documents": 12},
+  "shift_totals": {
+    "realiz": {"count": 3, "sum": "195.00", "pay_forms": [{"code": 0, "name": "ГОТІВКА", "sum": "130.00"}]},
+    "return": {"count": 0, "sum": "0.00"},
+    "service_in": "0.00",
+    "service_out": "0.00"
+  },
+  "offline_limits": {"session_seconds": 129600, "month_seconds": 604800},
+  "attention": {"reason": "auto_close_failing", "since": "2026-08-02T21:00:00Z"}
+}

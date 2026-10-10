@@ -1,0 +1,47 @@
+{
+    "name": "prro-cloud/prro-php",
+    "description": "PHP-клієнт для API PRRO.cloud: фіскалізація чеків програмного РРО",
+    "type": "library",
+    "license": "Apache-2.0",
+    "keywords": ["prro", "пРРО", "фіскалізація", "ДПС", "fiscal", "ukraine", "receipt"],
+    "homepage": "https://prro.cloud",
+    "support": {
+        "issues": "https://github.com/prro-cloud/prro-php/issues",
+        "docs": "https://prro.cloud/api/",
+        "email": "support@prro.cloud"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3",
+        "guzzlehttp/guzzle": "^7",
+        "phpstan/phpstan": "^2",
+        "phpstan/phpstan-strict-rules": "^2",
+        "phpunit/phpunit": "^11",
+        "psr/http-client": "^1",
+        "psr/http-factory": "^1",
+        "psr/http-message": "^1.1 || ^2",
+        "psr/log": "^3",
+        "symfony/yaml": "^7"
+    },
+    "suggest": {
+        "psr/http-client": "Власний HTTP-клієнт через Psr18Transport",
+        "psr/log": "Журнал запитів через параметр logger"
+    },
+    "autoload": {
+        "psr-4": {
+            "PrroCloud\\Prro\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PrroCloud\\Prro\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

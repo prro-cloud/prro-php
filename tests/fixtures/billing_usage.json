@@ -1,0 +1,9 @@
+{
+  "balance": "150000.0000",
+  "soft_limit": "0.0000",
+  "blocked": false,
+  "period": {"from": "2026-07-01", "to": "2026-08-01"},
+  "receipts": 1200,
+  "charged": "60000.0000",
+  "tariff": {"plan_id": "p1", "price_per_receipt": "50.0000"}
+}

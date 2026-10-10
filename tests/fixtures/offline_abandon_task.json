@@ -1,0 +1,18 @@
+{
+  "task_id": "t1",
+  "type": "abandon_offline_session",
+  "status": "succeeded",
+  "created_at": "2026-08-03T01:07:53Z",
+  "result": {
+    "offline_abandon": {
+      "session_id": "s1",
+      "dps_session_id": 77,
+      "held_documents": 3,
+      "closed": true,
+      "abandoned": [
+        {"document_id": "d1", "class": "check", "kind": "sale", "local_number": 45, "fiscal_number": "77.4.1234",
+         "total": "65.00", "pay_form": "cash", "created_at": "2026-08-02T10:00:00Z"}
+      ]
+    }
+  }
+}
