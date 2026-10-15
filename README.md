@@ -363,7 +363,7 @@ $result = Webhook::process($secret, $handler, 'POST', $body, Webhook::sign($secr
 
 ## Документація API
 
-- [prro.cloud/api](https://prro.cloud/api/) — документація REST API.
+- [prro.cloud/docs/api](https://prro.cloud/docs/api/) — документація REST API.
 - [llms-full.txt](https://prro.cloud/llms-full.txt) — уся документація одним
   файлом для ШІ-асистента.
 - [openapi.yaml](https://prro.cloud/api/openapi.yaml) — контракт OpenAPI 3.1.
