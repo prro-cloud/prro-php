@@ -7,8 +7,8 @@
     "homepage": "https://prro.cloud",
     "support": {
         "issues": "https://github.com/prro-cloud/prro-php/issues",
-        "docs": "https://prro.cloud/api/",
-        "email": "support@prro.cloud"
+        "docs": "https://prro.cloud/docs/sdk/",
+        "email": "info@prro.cloud"
     },
     "require": {
         "php": "^8.2",
