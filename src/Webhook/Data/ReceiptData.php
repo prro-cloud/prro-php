@@ -9,6 +9,7 @@ use PrroCloud\Prro\Enum\ReceiptType;
 use PrroCloud\Prro\Internal\Attribute\Json;
 use PrroCloud\Prro\Internal\Attribute\ListOf;
 use PrroCloud\Prro\Model\ReturnOriginal;
+use PrroCloud\Prro\Model\TaxTotal;
 use PrroCloud\Prro\Money\Amount;
 
 /**
@@ -33,7 +34,7 @@ final readonly class ReceiptData
      * @param Amount|null          $rounding             заокруглення готівки, якщо було
      * @param list<ReceiptLine>    $items                рядки чека
      * @param list<ReceiptPayment> $payments             форми оплати
-     * @param list<ReceiptTax>     $taxes                податки чека
+     * @param list<TaxTotal>       $taxes                податки чека
      * @param string               $comment              коментар, надрукований на чеку
      * @param ReturnOriginal|null  $original             чек, який повертає повернення чи скасовує сторно
      * @param string               $receiptUrl           копія чека для покупця
@@ -60,7 +61,7 @@ final readonly class ReceiptData
         #[Json('rounding')] public ?Amount $rounding = null,
         #[Json('items'), ListOf(ReceiptLine::class)] public array $items = [],
         #[Json('payments'), ListOf(ReceiptPayment::class)] public array $payments = [],
-        #[Json('taxes'), ListOf(ReceiptTax::class)] public array $taxes = [],
+        #[Json('taxes'), ListOf(TaxTotal::class)] public array $taxes = [],
         #[Json('comment')] public string $comment = '',
         #[Json('original')] public ?ReturnOriginal $original = null,
         #[Json('receipt_url')] public string $receiptUrl = '',

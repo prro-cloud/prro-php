@@ -8,6 +8,7 @@ use PrroCloud\Prro\Exception\ApiException;
 use PrroCloud\Prro\Exception\TransportException;
 use PrroCloud\Prro\Input\ServiceReceipt;
 use PrroCloud\Prro\Input\SettlementReceipt;
+use PrroCloud\Prro\Input\StornoReceipt;
 use PrroCloud\Prro\Internal\Hydrator;
 use PrroCloud\Prro\Internal\Requester;
 use PrroCloud\Prro\Model\Task;
@@ -36,13 +37,14 @@ final readonly class ReceiptsService
      * Без ключа клієнт генерує UUIDv7 — його вистачає для повторів у межах
      * одного виклику.
      *
-     * @throws \PrroCloud\Prro\Exception\TaskFailedException             ДПС відхилила документ, немає відкритої зміни тощо
+     * @throws \PrroCloud\Prro\Exception\TaskFailedException             ДПС відхилила документ, немає відкритої зміни,
+     *                                                                   сторно не останнього документа тощо
      * @throws \PrroCloud\Prro\Exception\PaymentRequiredException        баланс вичерпано
      * @throws \PrroCloud\Prro\Exception\IdempotencyKeyReusedException ключ уже використано для іншої операції
      * @throws ApiException
      * @throws TransportException
      */
-    public function create(SettlementReceipt|ServiceReceipt $receipt, ?string $idempotencyKey = null, bool $async = false): Task
+    public function create(SettlementReceipt|StornoReceipt|ServiceReceipt $receipt, ?string $idempotencyKey = null, bool $async = false): Task
     {
         $data = $this->requester->send('POST', '/v1/receipts', body: $receipt, fiscal: true, idempotencyKey: $idempotencyKey, async: $async);
 

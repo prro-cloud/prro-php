@@ -2,21 +2,24 @@
 
 declare(strict_types=1);
 
-namespace PrroCloud\Prro\Webhook\Data;
+namespace PrroCloud\Prro\Model;
 
 use PrroCloud\Prro\Internal\Attribute\Json;
 use PrroCloud\Prro\Money\Amount;
 
 /**
- * Податок зареєстрованого чека.
+ * Податок за однією ставкою: оборот і сума податку — у підсумках Z-звіту
+ * ({@see ZReportTotalsSide::$taxes}) і в даних події receipt.registered.
  */
-final readonly class ReceiptTax
+final readonly class TaxTotal
 {
     /**
+     * @param string $letter   податкова літера: "А"
+     * @param string $name     назва податку: "ПДВ"
      * @param string $rate     ставка у відсотках: "20.00"
-     * @param Amount $turnover оборот за ставкою
+     * @param Amount $turnover оборот — сума продажів за цією ставкою
      * @param Amount $sum      сума податку
-     * @param bool   $excluded податок нараховано понад ціну
+     * @param bool   $excluded податок додано до ціни, а не включено в неї
      */
     public function __construct(
         #[Json('letter')] public string $letter = '',

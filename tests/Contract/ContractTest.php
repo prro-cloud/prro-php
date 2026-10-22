@@ -213,7 +213,8 @@ final class ContractTest extends TestCase
 
     public function testReceiptTypeSplit(): void
     {
-        self::assertEqualsCanonicalizing(['sale', 'return', 'storno'], self::enumValues(['components', 'schemas', 'SettlementReceiptInput', 'properties', 'type']));
+        self::assertEqualsCanonicalizing(['sale', 'return'], self::enumValues(['components', 'schemas', 'SettlementReceiptInput', 'properties', 'type']));
+        self::assertEqualsCanonicalizing(['storno'], self::enumValues(['components', 'schemas', 'StornoReceiptInput', 'properties', 'type']));
         self::assertEqualsCanonicalizing(['service_in', 'service_out'], self::enumValues(['components', 'schemas', 'ServiceReceiptInput', 'properties', 'type']));
     }
 
@@ -262,6 +263,9 @@ final class ContractTest extends TestCase
         // Результати завдань кабінету (перевірка ключа, об'єкти ДПС) машинному API не потрібні.
         yield 'TaskResult' => [$schema('TaskResult'), Model\TaskResult::class, ['key_verification', 'key_password_check', 'dps_objects']];
         yield 'DocResult' => [$schema('DocResult'), Model\DocResult::class, []];
+        yield 'ZReportTotals' => [$schema('ZReportTotals'), Model\ZReportTotals::class, []];
+        yield 'ZReportTotalsSide' => [$schema('ZReportTotalsSide'), Model\ZReportTotalsSide::class, []];
+        yield 'TaxTotal' => [$schema('TaxTotal'), Model\TaxTotal::class, []];
         yield 'ReturnOriginal' => [$schema('ReturnOriginal'), Model\ReturnOriginal::class, []];
         yield 'OfflineAbandonResult' => [$schema('OfflineAbandonResult'), Model\OfflineAbandonResult::class, []];
         yield 'AbandonedDocument' => [$schema('AbandonedDocument'), Model\AbandonedDocument::class, []];
@@ -273,6 +277,9 @@ final class ContractTest extends TestCase
         yield 'SettlementReceipt' => [$schema('SettlementReceiptInput'), Input\SettlementReceipt::class, ['mode']];
         yield 'ReceiptOriginal' => [$schema('SettlementReceiptInput', 'properties', 'original'), Input\ReceiptOriginal::class, []];
         yield 'ServiceReceipt' => [$schema('ServiceReceiptInput'), Input\ServiceReceipt::class, ['mode']];
+        // type задає сам клас StornoReceipt.
+        yield 'StornoReceipt' => [$schema('StornoReceiptInput'), Input\StornoReceipt::class, ['mode', 'type']];
+        yield 'StornoOriginal' => [$schema('StornoReceiptInput', 'properties', 'original'), Input\StornoOriginal::class, []];
         yield 'ReceiptItem' => [$schema('ReceiptItem'), Input\ReceiptItem::class, []];
         yield 'Discount' => [$schema('ReceiptItem', 'properties', 'discount'), Input\Discount::class, []];
         yield 'Payment' => [$schema('ReceiptPayment'), Input\Payment::class, []];
@@ -284,7 +291,8 @@ final class ContractTest extends TestCase
         yield 'ReceiptData' => [$schema('ReceiptRegisteredData'), Data\ReceiptData::class, []];
         yield 'ReceiptLine' => [$schema('ReceiptRegisteredData', 'properties', 'items', 'items'), Data\ReceiptLine::class, []];
         yield 'ReceiptPayment' => [$schema('ReceiptRegisteredData', 'properties', 'payments', 'items'), Data\ReceiptPayment::class, []];
-        yield 'ReceiptTax' => [$schema('ReceiptRegisteredData', 'properties', 'taxes', 'items'), Data\ReceiptTax::class, []];
+        yield 'ReceiptData.taxes' => [$schema('ReceiptRegisteredData', 'properties', 'taxes', 'items'), Model\TaxTotal::class, []];
+        yield 'ShiftData' => [$schema('ShiftEventData'), Data\ShiftData::class, []];
         yield 'ReceiptData.original' => [$schema('ReceiptRegisteredData', 'properties', 'original'), Model\ReturnOriginal::class, []];
         yield 'BillingUsage' => [$schema('BillingUsage'), Model\BillingUsage::class, []];
         yield 'BillingPeriod' => [$schema('BillingUsage', 'properties', 'period'), Model\BillingPeriod::class, []];
@@ -346,14 +354,48 @@ final class ContractTest extends TestCase
     }
 
     /**
+     * Поля схеми з розіменуванням $ref і злиттям частин allOf. Поля поруч
+     * із $ref (OpenAPI 3.1 це дозволяє) теж враховуються.
+     *
+     * @return array<mixed>
+     */
+    private static function properties(mixed $node): array
+    {
+        if (!is_array($node)) {
+            return [];
+        }
+        $props = is_array($node['properties'] ?? null) ? $node['properties'] : [];
+        if (is_string($node['$ref'] ?? null) && str_starts_with($node['$ref'], '#/')) {
+            $props += self::properties(self::at(self::spec(), explode('/', substr($node['$ref'], 2))));
+        }
+        foreach (is_array($node['allOf'] ?? null) ? $node['allOf'] : [] as $part) {
+            $props += self::properties($part);
+        }
+
+        return $props;
+    }
+
+    /**
+     * type StornoReceipt дописує сам у jsonSerialize(), повз атрибути #[Json],
+     * тож звіряємо надіслане тіло з усіма необов'язковими полями.
+     */
+    public function testStornoReceiptBody(): void
+    {
+        $body = json_decode((string) json_encode(new Input\StornoReceipt('r1', '1', cashier: 'x', comment: 'x')), true);
+        self::assertIsArray($body);
+        self::assertSame('storno', $body['type'] ?? null);
+        self::assertFieldsMatch(self::schemaPath('StornoReceiptInput'), array_map(strval(...), array_keys($body)), ['mode'], 'StornoReceipt body');
+    }
+
+    /**
      * @param list<string> $path
      * @param list<string> $fields
      * @param list<string> $skip
      */
     private static function assertFieldsMatch(array $path, array $fields, array $skip, string $name): void
     {
-        $props = self::at(self::spec(), [...$path, 'properties']);
-        self::assertIsArray($props, $name . ': no such schema with properties in contract');
+        $props = self::properties(self::at(self::spec(), $path));
+        self::assertNotSame([], $props, $name . ': no such schema with properties in contract');
         $props = array_values(array_diff(array_map(strval(...), array_keys($props)), $skip));
 
         self::assertSame([], array_values(array_diff($props, $fields)), $name . ': contract fields without a model field');

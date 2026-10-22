@@ -12,9 +12,9 @@ use PrroCloud\Prro\Internal\Lists;
 use PrroCloud\Prro\Money\Amount;
 
 /**
- * Розрахунок за товари: реалізація, повернення або сторно. Рух готівки
- * повз продаж — {@see ServiceReceipt}: поля чужої форми API відхиляє з 422,
- * тож форми розділено на рівні класів.
+ * Розрахунок за товари: реалізація або повернення. Сторно —
+ * {@see StornoReceipt}, рух готівки повз продаж — {@see ServiceReceipt}: поля
+ * чужої форми API відхиляє з 422, тож форми розділено на рівні класів.
  *
  *     new SettlementReceipt(
  *         cashRegisterId: $registerId,
@@ -37,7 +37,7 @@ final readonly class SettlementReceipt implements \JsonSerializable
 
     /**
      * @param string                  $cashRegisterId каса, на якій реєструють документ; обов'язкове
-     * @param ReceiptType             $type           Sale, Return або Storno
+     * @param ReceiptType             $type           Sale або Return
      * @param list<ReceiptItem>       $items          позиції чека; щонайменше одна
      * @param list<Payment>           $payments       оплати чека; щонайменше одна
      * @param string|null             $cashier        ім'я касира, яке друкують у чеку; без нього рядка не буде
@@ -47,7 +47,7 @@ final readonly class SettlementReceipt implements \JsonSerializable
      *                                                сервісу пізніше за касу. Друкується рядком «Продаж від
      *                                                03.09.2026 18:11», але фіскальним часом документа не
      *                                                стає. Час у майбутньому або старіший за 31 день — 422
-     * @param ReceiptOriginal|null    $original       початковий чек; обов'язковий для повернення та сторно
+     * @param ReceiptOriginal|null    $original       початковий чек; обов'язковий для повернення
      * @param Amount|string|null      $roundingStep   крок заокруглення готівки ("0.10" за правилами НБУ);
      *                                                null — без заокруглення
      *
@@ -64,9 +64,9 @@ final readonly class SettlementReceipt implements \JsonSerializable
         #[Json('original')] public ?ReceiptOriginal $original = null,
         #[Json('rounding_step')] Amount|string|null $roundingStep = null,
     ) {
-        if (!in_array($type, [ReceiptType::Sale, ReceiptType::Return, ReceiptType::Storno], true)) {
+        if ($type !== ReceiptType::Sale && $type !== ReceiptType::Return) {
             throw new InvalidArgumentException(sprintf(
-                'prro: SettlementReceipt: type must be sale, return or storno, got "%s"',
+                'prro: SettlementReceipt: type must be sale or return (storno is StornoReceipt), got "%s"',
                 $type->value,
             ));
         }
