@@ -9,7 +9,7 @@ use PrroCloud\Prro\Internal\DateTimes;
 use PrroCloud\Prro\Internal\Hydrator;
 
 /**
- * Посилання на початковий чек повернення або сторно.
+ * Посилання на початковий чек повернення.
  */
 final readonly class ReceiptOriginal implements \JsonSerializable
 {

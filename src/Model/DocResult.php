@@ -29,6 +29,7 @@ final readonly class DocResult
      *                                                  незалежне підтвердження фіскалізації. Порожній, доки
      *                                                  документ не потрапив до ДПС
      * @param ReturnOriginal|null $original             початковий чек; лише в документа повернення
+     * @param ZReportTotals|null  $totals               підсумки зміни, як їх отримала ДПС; лише в Z-звіту
      */
     public function __construct(
         #[Json('document_id')] public string $documentId = '',
@@ -39,5 +40,6 @@ final readonly class DocResult
         #[Json('receipt_url')] public string $receiptUrl = '',
         #[Json('tax_url')] public string $taxUrl = '',
         #[Json('original')] public ?ReturnOriginal $original = null,
+        #[Json('totals')] public ?ZReportTotals $totals = null,
     ) {}
 }

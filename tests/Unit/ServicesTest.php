@@ -33,6 +33,8 @@ use PrroCloud\Prro\Input\ReceiptItem;
 use PrroCloud\Prro\Input\ReceiptOriginal;
 use PrroCloud\Prro\Input\ServiceReceipt;
 use PrroCloud\Prro\Input\SettlementReceipt;
+use PrroCloud\Prro\Input\StornoOriginal;
+use PrroCloud\Prro\Input\StornoReceipt;
 use PrroCloud\Prro\Money\Amount;
 use PrroCloud\Prro\Service\InvoicesService;
 use PrroCloud\Prro\Testing\MockTransport;
@@ -103,6 +105,24 @@ final class ServicesTest extends TestCase
         self::assertSame(TaskStatus::Pending, $task->status);
     }
 
+    public function testReceiptsCreateStorno(): void
+    {
+        [$client, $mock] = $this->stub(201, self::TASK);
+
+        $client->receipts->create(new StornoReceipt(cashRegisterId: 'reg-1', original: '7466800082', comment: 'Помилка касира'));
+
+        $r = $mock->lastRequest();
+        self::assertRequest($r, 'POST', '/v1/receipts');
+        self::assertSame(
+            ['type' => 'storno', 'cash_register_id' => 'reg-1', 'original' => ['fiscal_number' => '7466800082'], 'comment' => 'Помилка касира'],
+            self::body($r),
+        );
+        self::assertEquals(
+            new StornoReceipt('reg-1', '7466800082'),
+            new StornoReceipt('reg-1', new StornoOriginal('7466800082')),
+        );
+    }
+
     /**
      * @return iterable<string, array{\Closure(): object}>
      */
@@ -111,6 +131,9 @@ final class ServicesTest extends TestCase
         $item = new ReceiptItem(name: 'x', quantity: 1, price: '1.00');
         $pay = new Payment(type: PaymentType::Cash, sum: '1.00');
         yield 'settlement as service' => [static fn() => new SettlementReceipt('r', ReceiptType::ServiceIn, [$item], [$pay])];
+        // Сторно — окрема форма без позицій і оплат.
+        yield 'settlement as storno' => [static fn() => new SettlementReceipt('r', ReceiptType::Storno, [$item], [$pay])];
+        yield 'storno without original' => [static fn() => new StornoReceipt('r', '')];
         yield 'settlement unknown' => [static fn() => new SettlementReceipt('r', ReceiptType::Unknown, [$item], [$pay])];
         yield 'service as sale' => [static fn() => new ServiceReceipt('r', ReceiptType::Sale, '1.00')];
         yield 'service unknown' => [static fn() => new ServiceReceipt('r', ReceiptType::Unknown, '1.00')];
@@ -256,7 +279,7 @@ final class ServicesTest extends TestCase
 
     public function testCashRegisters(): void
     {
-        [$client, $mock] = $this->stub(200, '{"cash_registers":[{"id":"reg-1","fiscal_number":"4001063533","local_number":"1",
+        [$client, $mock] = $this->stub(200, '{"cash_registers":[{"id":"reg-1","fiscal_number":"4000000001","local_number":"1",
             "org_name":"ФОП Іваненко","mode":"production","state":"opened"}]}');
         $list = $client->cashRegisters->list();
         self::assertRequest($mock->lastRequest(), 'GET', '/v1/cash-registers');
