@@ -12,9 +12,9 @@
       "document_id": "0197a2c3-0000-7000-8000-000000000002",
       "local_number": 42,
       "fiscal_number": "7466800082",
-      "register_fiscal_number": "4001063533",
+      "register_fiscal_number": "4000000001",
       "receipt_url": "https://r.prro.cloud/aB3xK9pQvT2mNr7c",
-      "tax_url": "https://cabinet.tax.gov.ua/cashregs/check?fn=4001063533&id=7466800082"
+      "tax_url": "https://cabinet.tax.gov.ua/cashregs/check?fn=4000000001&id=7466800082"
     }
   }
 }

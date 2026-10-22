@@ -256,7 +256,7 @@ final class ServicesTest extends TestCase
 
     public function testCashRegisters(): void
     {
-        [$client, $mock] = $this->stub(200, '{"cash_registers":[{"id":"reg-1","fiscal_number":"4001063533","local_number":"1",
+        [$client, $mock] = $this->stub(200, '{"cash_registers":[{"id":"reg-1","fiscal_number":"4000000001","local_number":"1",
             "org_name":"ФОП Іваненко","mode":"production","state":"opened"}]}');
         $list = $client->cashRegisters->list();
         self::assertRequest($mock->lastRequest(), 'GET', '/v1/cash-registers');

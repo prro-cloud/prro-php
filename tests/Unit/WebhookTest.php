@@ -122,7 +122,7 @@ final class WebhookTest extends TestCase
     {
         yield 'task.completed' => ['task.completed', '{"task_id":"t1","type":"receipt","status":"succeeded","cash_register_id":"r1",
             "result":{"receipt":{"document_id":"d1","local_number":42,"fiscal_number":"7466800082",
-            "register_fiscal_number":"4001063533","receipt_url":"https://r.prro.cloud/aB3xK9pQvT2mNr7c"}}}', static function (Event $e): void {
+            "register_fiscal_number":"4000000001","receipt_url":"https://r.prro.cloud/aB3xK9pQvT2mNr7c"}}}', static function (Event $e): void {
             $d = $e->task();
             self::assertSame(TaskStatus::Succeeded, $d->status);
             self::assertSame('7466800082', $d->result?->receipt?->fiscalNumber);
@@ -176,7 +176,7 @@ final class WebhookTest extends TestCase
             self::assertSame(100, $d->receiptsLeft);
             self::assertSame('50.0000', (string) $d->pricePerReceipt);
         }];
-        yield 'receipt.registered' => ['receipt.registered', '{"cash_register_id":"r1","register_fiscal_number":"4001063533",
+        yield 'receipt.registered' => ['receipt.registered', '{"cash_register_id":"r1","register_fiscal_number":"4000000001",
             "document_id":"d2","task_id":"t2","type":"return","source":"cabinet","user_id":"u1","cashier":"Олена",
             "local_number":43,"fiscal_number":"7466800083","offline":false,"testing":false,"shift_id":"s1",
             "shift_number":147,"issued_at":"2026-07-14T10:15:04.123456789Z","total":"65.00",
