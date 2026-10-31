@@ -23,7 +23,11 @@ enum WebhookEvent: string
     case RegisterOffline = 'register.offline';
     /** Каса повернулася онлайн. */
     case RegisterOnline = 'register.online';
-    /** Наближення до законних меж офлайн-сесії (36 і 168 годин). */
+    /**
+     * Каса досягла законних меж офлайн-роботи (36 годин на сесію, 168 на
+     * місяць). Якщо межі знято, у даних limitsLifted, і документи через межі
+     * не відхиляються.
+     */
     case RegisterOfflineLimit = 'register.offline_limit';
     /** Від офлайн-сесії відмовлено; у даних — документи, яких ДПС не отримала. */
     case RegisterOfflineAbandoned = 'register.offline_abandoned';

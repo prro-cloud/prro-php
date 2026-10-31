@@ -257,7 +257,7 @@ final class ServicesTest extends TestCase
     public function testEmptyIdAndEscaping(): void
     {
         [$client, $mock] = $this->stub(200, '{"id":"a/b","fiscal_number":"1","local_number":"1","mode":"test","state":"closed",
-            "offline_limits":{"session_seconds":129600,"month_seconds":604800}}');
+            "offline_limits":{"session_seconds":129600,"month_seconds":604800,"enforced":true}}');
         foreach ([
             static fn(Client $c): mixed => $c->tasks->get(''),
             static fn(Client $c): mixed => $c->webhooks->replay('w1', ''),
@@ -300,6 +300,27 @@ final class ServicesTest extends TestCase
         self::assertSame(36 * 3600, $st->offlineLimits->sessionSeconds);
         self::assertSame(AttentionReason::AutoCloseFailing, $st->attention?->reason);
         self::assertNull($st->offlineSession);
+        self::assertTrue($st->offlineLimits->enforced);
+        self::assertNull($st->offlineLimits->restoredAt);
+
+        [$client] = $this->stub(200, '{
+            "id":"reg-1","fiscal_number":"4000000001","local_number":"1","mode":"production","state":"offline",
+            "offline_session":{"id":"os1","dps_session_id":77,"started_at":"2026-08-01T00:00:00Z","documents":40,
+                "submit_paused_at":"2026-08-02T10:00:00Z",
+                "submit_fault":{"code":"dps.offline_package_rejected","class":"user_action","message":"Пакет відхилено"}},
+            "offline_limits":{"session_seconds":129600,"month_seconds":604800,"enforced":false,
+                "restored_at":"2026-07-01T00:00:00Z"},
+            "offline_month_used_seconds":180000,
+            "attention":{"reason":"offline_submission_paused","since":"2026-08-02T10:00:00Z"}}');
+        $st = $client->cashRegisters->get('reg-1');
+        $sess = $st->offlineSession;
+        self::assertNotNull($sess);
+        self::assertSame('2026-08-02T10:00:00+00:00', $sess->submitPausedAt?->format(DATE_ATOM));
+        self::assertSame(FaultClass::UserAction, $sess->submitFault?->class);
+        self::assertSame('dps.offline_package_rejected', $sess->submitFault->code);
+        self::assertFalse($st->offlineLimits->enforced);
+        self::assertSame('2026-07-01', $st->offlineLimits->restoredAt?->format('Y-m-d'));
+        self::assertSame(AttentionReason::OfflineSubmissionPaused, $st->attention?->reason);
 
         [$client, $mock] = $this->stub(200, '{"cleared":true}');
         self::assertTrue($client->cashRegisters->clearAttention('reg-1'));

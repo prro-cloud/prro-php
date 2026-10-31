@@ -6,6 +6,31 @@
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-31
+
+Контракт API 0.10.0, паритет із prro-go 0.4.0.
+
+### Додано
+
+- `OfflineLimits::$enforced` — чи діють законодавчі межі офлайн-роботи.
+  `false` — межі знято (п. 13 «Прикінцевих положень» Закону № 265): час
+  рахується, але документи через межі не відхиляються. Сервер до 0.10.0 поля
+  не надсилає, і воно читається як `false`.
+- `OfflineLimits::$restoredAt` — коли межі повернули після зняття; від цього
+  часу рахують використаний час, якщо він пізніший за початок сесії чи місяця.
+- `OfflineSession::$submitPausedAt` і `OfflineSession::$submitFault` — коли й
+  з якою помилкою ДПС (`Model\Fault`) зупинилося надсилання офлайн-пакетів.
+  Відновлюють через `offlineSessions->retry()`.
+- `Webhook\Data\OfflineData::$limitsLifted` — подія `register.offline_limit`
+  надійшла при знятих межах і лише повідомляє.
+
+### Документація
+
+- Синхронізовано `tests/testdata/openapi.yaml`: описи контракту переписано
+  спрощеною технічною мовою.
+
+## [0.3.0] — 2026-10-22
+
 Контракт API 0.8.0, паритет із prro-go 0.3.0.
 
 ### Змінено
@@ -89,6 +114,8 @@
   чистого PHP, `Webhook::process()` для фреймворків і `fromPsrRequest()`.
 - Тести відповідності контракту OpenAPI.
 
-[Unreleased]: https://github.com/prro-cloud/prro-php/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/prro-cloud/prro-php/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/prro-cloud/prro-php/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/prro-cloud/prro-php/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/prro-cloud/prro-php/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/prro-cloud/prro-php/releases/tag/v0.1.0
