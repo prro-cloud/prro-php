@@ -170,6 +170,13 @@ final class WebhookTest extends TestCase
             self::assertSame(30 * 3600, $d->sessionUsedSeconds);
             self::assertSame(140 * 3600 + 12 * 60, $d->monthUsedSeconds);
             self::assertSame(77, $d->dpsSessionId);
+            self::assertFalse($d->limitsLifted);
+        }];
+        yield 'register.offline_limit lifted' => ['register.offline_limit', '{"cash_register_id":"r1","session_id":"s1","dps_session_id":77,
+            "started_at":"2026-07-13T00:00:00Z","session_used":"36h0m0s","month_used":"40h0m0s","limits_lifted":true}', static function (Event $e): void {
+            $d = $e->offline();
+            self::assertTrue($d->limitsLifted);
+            self::assertSame(36 * 3600, $d->sessionUsedSeconds);
         }];
         yield 'register.online' => ['register.online', '{"cash_register_id":"r1","session_id":"s1","dps_session_id":77,
             "started_at":"2026-07-13T00:00:00Z","ended_at":"2026-07-13T02:00:00Z","documents":15}', static function (Event $e): void {

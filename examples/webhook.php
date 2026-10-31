@@ -68,6 +68,10 @@ $result = Webhook::handle((string) getenv('PRRO_WEBHOOK_SECRET'), static functio
             break;
         case WebhookEvent::RegisterOfflineLimit:
             $d = $e->offline();
+            if ($d->limitsLifted) {
+                logLine('каса %s офлайн уже %d год (межі знято)', $d->cashRegisterId, intdiv($d->sessionUsedSeconds, 3600));
+                break;
+            }
             logLine('каса %s офлайн уже %d год — закрийте сесію', $d->cashRegisterId, intdiv($d->sessionUsedSeconds, 3600));
             break;
         case WebhookEvent::ClientBalanceLow:

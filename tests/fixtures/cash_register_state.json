@@ -14,6 +14,6 @@
     "service_in": "0.00",
     "service_out": "0.00"
   },
-  "offline_limits": {"session_seconds": 129600, "month_seconds": 604800},
+  "offline_limits": {"session_seconds": 129600, "month_seconds": 604800, "enforced": true},
   "attention": {"reason": "auto_close_failing", "since": "2026-08-02T21:00:00Z"}
 }

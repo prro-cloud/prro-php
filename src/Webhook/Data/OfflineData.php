@@ -20,6 +20,8 @@ final readonly class OfflineData
      *                                                    register.offline_limit (межа — 36 годин)
      * @param int                     $monthUsedSeconds   витрачений офлайн-час місяця, с; лише для
      *                                                    register.offline_limit (межа — 168 годин)
+     * @param bool                    $limitsLifted       межі знято: подія register.offline_limit лише
+     *                                                    повідомляє, документи через межі не відхиляються
      */
     public function __construct(
         #[Json('cash_register_id')] public string $cashRegisterId = '',
@@ -30,5 +32,6 @@ final readonly class OfflineData
         #[Json('documents')] public int $documents = 0,
         #[Json('session_used'), DurationSeconds] public int $sessionUsedSeconds = 0,
         #[Json('month_used'), DurationSeconds] public int $monthUsedSeconds = 0,
+        #[Json('limits_lifted')] public bool $limitsLifted = false,
     ) {}
 }
